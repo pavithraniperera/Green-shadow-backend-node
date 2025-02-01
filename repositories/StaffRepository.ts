@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 
 export class StaffRepository {
 
-    async createStaff(staffData: any, fieldIds: string[]): Promise<any> {
+    async createStaff(staffData: any, fieldIds: string[]=[]): Promise<any> {
         return prisma.$transaction(async (tx) => {
             const newStaff = await tx.staff.create({
                 data: {

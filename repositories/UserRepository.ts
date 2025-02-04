@@ -2,10 +2,16 @@ import {Prisma, PrismaClient} from "@prisma/client";
 import Role from "../model/Role";
 import {StaffRepository} from "./StaffRepository";
 import Staff from "../model/Staff";
+import dotenv from "dotenv";
+import bcrypt from "bcryptjs";
+import {hashPassword} from "./AuthRepository";
 
 
 const prisma = new PrismaClient();
 const staffRepository = new StaffRepository()
+dotenv.config();
+const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET ;
+const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET ;
 export  class UserRepository{
     async findUserByEmail(email: string) {
         return prisma.user.findUnique({ where: { email } });
@@ -34,13 +40,17 @@ export  class UserRepository{
                 joinDate: new Date(),
                 role
             });
+
         }
+        // Hash the password before saving it
+        const hashedPassword:string = await hashPassword(password);
         return await this.createUser({
-            email,
-            password,
-            role,
+            email: email,
+            password: hashedPassword,
+            role: role,
             Staff: {connect: {staffId: (staff as Staff).staffId}}
         });
+
     }
 
     async getAllUsers() {
@@ -65,6 +75,7 @@ export  class UserRepository{
             where: { id },
         });
     }
+
 
 
 

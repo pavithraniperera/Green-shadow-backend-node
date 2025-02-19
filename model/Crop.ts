@@ -4,7 +4,7 @@ export default class Crop{
     specificName: string;
     category: string;
     season: string;
-    image: string;
+    image1: string;
     fieldId: string;
 
 
@@ -14,7 +14,7 @@ export default class Crop{
         specificName: string,
         category: string,
         season: string,
-        image: string,
+        image1: string,
         fieldId: string
     ) {
         this.cropId = cropId;
@@ -22,7 +22,7 @@ export default class Crop{
         this.specificName = specificName;
         this.category = category;
         this.season = season;
-        this.image = image;
+        this.image1 = image1;
         this.fieldId = fieldId;
     }
 }

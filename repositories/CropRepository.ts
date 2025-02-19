@@ -6,10 +6,13 @@ const prisma = new PrismaClient();
 export class CropRepository{
 
     async createCrop(data: Prisma.CropCreateInput){
-
-       return   prisma.crop.create({
-          data,
-        });
+        console.log(data)
+        try {
+            return await prisma.crop.create({ data });
+        } catch (error) {
+            console.error('Prisma Error:', error);
+            return null;
+        }
 
 
     }

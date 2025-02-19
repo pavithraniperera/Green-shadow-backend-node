@@ -68,12 +68,25 @@ export class VehicleController {
     }
 
     async updateVehicle(req: Request, res: Response) {
+        console.log("update")
         try {
             const { id } = req.params;
-            const updates = req.body;
-            const updateVehicle = await vehicleRepository.updateVehicle(id, updates);
+            const { plateNumber, category, fuelType, status, remarks, staffId } = req.body;
+
+            // Ensure the types match Prisma.VehicleCreateInput
+            const vehicleData: Prisma.VehicleCreateInput = {
+                plateNumber: String(plateNumber),
+                category: String(category),
+                fuelType: String(fuelType),
+                status: String(status),
+                remarks: String(remarks),
+                ...(staffId && { Staff: { connect: { staffId: String(staffId) } } })
+            };
+            console.log(vehicleData)
+            const updateVehicle = await vehicleRepository.updateVehicle(id, vehicleData);
             res.status(200).json(updateVehicle);
         } catch (error) {
+            console.log(error)
             res.status(500).json({ message: 'Error updating Vehicle', error });
         }
     }

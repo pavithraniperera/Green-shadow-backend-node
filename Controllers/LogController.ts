@@ -2,15 +2,24 @@
 import {Request, Response} from "express";
 import {Prisma} from "@prisma/client";
 import {LogRepository} from "../repositories/LogRepository";
+import Logs from "../model/Logs";
 
 
 const logRepository = new LogRepository();
 
 export class LogController {
     async createLog(req: Request, res: Response) {
+
         console.log(req.body);
         try {
-            const { logDetails, date, image2, status, staffId, fieldId, cropId } = req.body;
+            const { logDetails, date, status, staffId, fieldId, cropId } = req.body;
+            const file = req.file;
+            console.log(req.body)
+            if (!file) {
+                res.status(400).json({ error: "No file uploaded" });
+            }
+
+            const image2 =  file?.path ;
 
             // Ensure the types match Prisma.VehicleCreateInput
             const logData: Prisma.LogCreateInput = {
@@ -28,6 +37,7 @@ export class LogController {
 
             res.status(201).json(newLog);
         } catch (error) {
+            console.log(error)
             res.status(500).json({ message: "Error creating Log", error });
         }
     }
@@ -59,13 +69,45 @@ export class LogController {
     async updateLog(req: Request, res: Response) {
         try {
             const { id } = req.params;
-            const updates = req.body;
-            const updateLog = await logRepository.updateLog(id, updates);
-            res.status(200).json(updateLog);
+
+            // Fetch the existing log
+            const log = await logRepository.getLogById(id);
+            if (!log) {
+                 res.status(404).json({ message: "Log not found" });
+            }
+
+            const { logDetails, date, status, staffId, fieldId, cropId } = req.body;
+
+            // Keep existing image if no new file is uploaded
+            let imagePath = (log as Logs).image2;
+            if (req.file) {
+                imagePath = req.file.path;
+            }
+
+            console.log(logDetails, date);
+
+            // Prepare update data
+            const updatedLogData = {
+                logDetails: String(logDetails),
+                date: new Date(date),
+                status: String(status),
+                image2: imagePath, // Use updated or existing image
+                Staff: { connect: { staffId: String(staffId) } } ,
+                ...(fieldId && { Field: { connect: { fieldId: String(fieldId) } } }),
+                ...(cropId && { Crop: { connect: { cropId: String(cropId) } } })
+            };
+
+            // Update log
+            const updatedLog = await logRepository.updateLog(id, updatedLogData);
+            console.log(updatedLog);
+
+            res.status(200).json(updatedLog);
         } catch (error) {
-            res.status(500).json({ message: 'Error updating Log', error });
+            console.error(error);
+            res.status(500).json({ message: "Error updating Log", error });
         }
     }
+
 
     async deleteLog(req: Request, res: Response) {
         try {

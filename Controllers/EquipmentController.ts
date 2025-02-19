@@ -86,10 +86,22 @@ export class EquipmentController {
     async updateEquipment(req: Request, res: Response) {
         try {
             const { id } = req.params;
-            const updates = req.body;
-            const updatedEquipment = await equipmentRepository.updateEquipment(id, updates);
+
+            const { type, name, status, fieldId, staffId, remarks } = req.body;
+
+            // Ensure the types match Prisma.EquipmentCreateInput
+            const equipmentData: Prisma.EquipmentCreateInput = {
+                type: String(type),
+                name: String(name),
+                status: String(status),
+                remarks: String(remarks),
+                ...(fieldId && { Field: { connect: { fieldId: String(fieldId) } } }),
+                ...(staffId && { Staff: { connect: { staffId: String(staffId) } } })
+            };
+            const updatedEquipment = await equipmentRepository.updateEquipment(id, equipmentData);
             res.status(200).json(updatedEquipment);
         } catch (error) {
+            console.log(error)
             res.status(500).json({ message: 'Error updating Equipment', error });
         }
     }

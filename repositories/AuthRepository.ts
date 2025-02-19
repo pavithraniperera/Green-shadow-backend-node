@@ -19,7 +19,7 @@ export const comparePassword = async (password: string, hashedPassword: string):
 
 //  Generate Access Token (Short-lived like 15 min)
 export const generateAccessToken = (userId: string, role: string): string => {
-    return jwt.sign({ userId, role }, ACCESS_TOKEN_SECRET, { expiresIn: "15m" });
+    return jwt.sign({ userId, role }, ACCESS_TOKEN_SECRET, { expiresIn: "1d" });
 };
 
 //  Generate Refresh Token (Long-lived, liked 7 days)
